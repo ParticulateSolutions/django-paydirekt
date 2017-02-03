@@ -169,27 +169,26 @@ class PaydirektCapture(models.Model):
         verbose_name_plural = _("Paydirekt Captures")
 
     def refresh_from_paydirekt(self, wrapper, expected_status=None):
-        checkout_response = wrapper.call_api(url=self.link)
-        if not checkout_response:
+        capture_response = wrapper.call_api(url=self.link)
+        if not capture_response:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Capture Link not available: {}".format(self.link))
             return False
 
-        if expected_status and expected_status != checkout_response['status']:
+        if expected_status and expected_status != capture_response['status']:
             logger = logging.getLogger(__name__)
-            logger.error("Paydirekt Capture Status Error: expected: {0}, found: {1}".format(expected_status, checkout_response['status']))
+            logger.error("Paydirekt Capture Status Error: expected: {0}, found: {1}".format(expected_status, capture_response['status']))
             return False
 
-        self.status = checkout_response['status']
+        self.status = capture_response['status']
         self.save()
 
         return True
 
 
-
 @python_2_unicode_compatible
 class PaydirektRefund(models.Model):
-    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='captures')
+    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='refunds')
     amount = models.DecimalField(_("amount"), max_digits=9, decimal_places=2)
     transaction_id = models.CharField(_("transaction id"), max_length=255, unique=True)
     link = models.URLField(_("link"))
@@ -209,18 +208,18 @@ class PaydirektRefund(models.Model):
         verbose_name_plural = _("Paydirekt Refund")
 
     def refresh_from_paydirekt(self, wrapper, expected_status=None):
-        checkout_response = wrapper.call_api(url=self.link)
-        if not checkout_response:
+        refund_response = wrapper.call_api(url=self.link)
+        if not refund_response:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Refund Link not available: {}".format(self.link))
             return False
 
-        if expected_status and expected_status != checkout_response['status']:
+        if expected_status and expected_status != refund_response['status']:
             logger = logging.getLogger(__name__)
-            logger.error("Paydirekt Refund Status Error: expected: {0}, found: {1}".format(expected_status, checkout_response['status']))
+            logger.error("Paydirekt Refund Status Error: expected: {0}, found: {1}".format(expected_status, refund_response['status']))
             return False
 
-        self.status = checkout_response['status']
+        self.status = refund_response['status']
         self.save()
 
         return True

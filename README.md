@@ -29,6 +29,7 @@ PAYDIREKT_SANDBOX = True
 
 PAYDIREKT_VALID_CHECKOUT_STATUS = ['OPEN', 'PENDING', 'APPROVED']
 PAYDIREKT_VALID_CAPTURE_STATUS = ['OPEN', 'PENDING', 'SUCCESSFUL']
+PAYDIREKT_VALID_REFUND_STATUS = ['PENDING', 'SUCCESSFUL']
 	```
 
 3. Use methods for initialization and updating transaction where you need it:
