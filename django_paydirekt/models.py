@@ -94,6 +94,8 @@ class PaydirektCheckout(models.Model):
             self.captures_link = checkout_response['_links']['captures']['href']
         self.save()
 
+        return True
+
 
 @python_2_unicode_compatible
 class PaydirektCapture(models.Model):
@@ -131,3 +133,5 @@ class PaydirektCapture(models.Model):
 
         self.status = checkout_response['status']
         self.save()
+
+        return True

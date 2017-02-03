@@ -60,8 +60,8 @@ class NotifyPaydirektView(View):
         """
             Override to use the paydirekt_checkout in the way you want.
         """
-        updated_checkout = paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status)
-        if updated_checkout:
+        updated_checkout = paydirekt_checkout
+        if updated_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
             if updated_checkout.status not in settings.PAYDIREKT_VALID_CHECKOUT_STATUS:
                 import logging
                 logger = logging.getLogger(__name__)
@@ -73,8 +73,8 @@ class NotifyPaydirektView(View):
         """
             Override to use the paydirekt_capture in the way you want.
         """
-        updated_capture = paydirekt_capture.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status)
-        if updated_capture:
+        updated_capture = paydirekt_capture
+        if updated_capture.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
             if updated_capture.status not in settings.PAYDIREKT_VALID_CAPTURE_STATUS:
                 import logging
                 logger = logging.getLogger(__name__)
