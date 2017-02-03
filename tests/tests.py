@@ -159,49 +159,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.total_amount, 1.00)
 
     def test_full_valid_direct_sale_checkout(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='DIRECT_SALE',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_direct_sale()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
 
@@ -211,49 +169,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
 
     def test_full_valid_order_checkout_full_with_notification(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='ORDER',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_order()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
@@ -269,49 +185,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
     def test_full_valid_order_checkout_full_with_manual_update(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='ORDER',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_order()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
@@ -325,49 +199,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertNotEqual(paydirekt_checkout.captures_link, '')
 
     def test_full_valid_direct_sale_checkout_full_with_notification(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='DIRECT_SALE',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_direct_sale()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
@@ -383,49 +215,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
     def test_full_valid_direct_sale_checkout_full_with_manual_update(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='DIRECT_SALE',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_direct_sale()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
@@ -437,49 +227,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
     def test_create_capture_50_50(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
-            payment_type='ORDER',
-            total_amount=100,
-            shipping_amount=3.5,
-            order_amount=96.5,
-            email_address='max@muster.de',
-            customer_number=123,
-            reconciliation_reference_number=124,
-            reference_number=125,
-            invoice_reference_number=126,
-            note='Your Test at django-paydirekt.',
-            minimum_age=18,
-            currency_code='EUR',
-            overcapture=False,
-            delivery_type='STANDARD',
-            delivery_information={
-                "expectedShippingDate": "2016-10-19T12:00:00Z",
-                "logisticsProvider": "DHL",
-                "trackingNumber": "1234567890"
-            },
-            shipping_address={
-                'addresseeGivenName': 'Hermann',
-                'addresseeLastName': 'Meyer',
-                'street': 'Wieseneckstraße',
-                'streetNr': '26',
-                'zip': '90571',
-                'city': 'Schwaig bei Nürnberg',
-                'countryCode': 'DE'
-            },
-            items=[
-                {
-                    'quantity': 3,
-                    'name': 'Bobbycar',
-                    'ean': '800001303',
-                    'price': 25.99
-                },
-                {
-                    'quantity': 1,
-                    'name': 'Helm',
-                    'price': 18.53
-                }
-            ]
-        )
+        paydirekt_checkout = self._create_order()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
@@ -519,7 +267,190 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_capture2.status, 'SUCCESSFUL')
 
     def test_create_capture_too_high(self):
-        paydirekt_checkout = self.paydirekt_wrapper.init(
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+        paydirekt_capture = paydirekt_checkout.create_capture(amount=120,
+                                                              wrapper=self.paydirekt_wrapper,
+                                                              note='First payment',
+                                                              final=True,
+                                                              reference_number='Payment1',
+                                                              reconciliation_reference_number='Payment1',
+                                                              invoice_reference_number='Payment1',
+                                                              notification_url='/',
+                                                              delivery_information={
+                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                  "logisticsProvider": "DHL",
+                                                                  "trackingNumber": "1234567890"
+                                                              })
+        self.assertFalse(paydirekt_capture)
+
+    def test_close_checkout_without_captures(self):
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+        self.assertTrue(paydirekt_checkout.close(self.paydirekt_wrapper))
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'CLOSED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='CLOSED')
+        self.assertEqual(paydirekt_checkout.status, 'CLOSED')
+
+    def test_close_checkout_with_captures(self):
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+
+        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
+                                                              wrapper=self.paydirekt_wrapper,
+                                                              note='First payment',
+                                                              final=False,
+                                                              reference_number='Payment1',
+                                                              reconciliation_reference_number='Payment1',
+                                                              invoice_reference_number='Payment1',
+                                                              notification_url='/',
+                                                              delivery_information={
+                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                  "logisticsProvider": "DHL",
+                                                                  "trackingNumber": "1234567890"
+                                                              })
+        self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
+        paydirekt_capture2 = paydirekt_checkout.create_capture(amount=50,
+                                                               wrapper=self.paydirekt_wrapper,
+                                                               note='Second payment',
+                                                               final=True,
+                                                               reference_number='Payment2',
+                                                               reconciliation_reference_number='Payment2',
+                                                               invoice_reference_number='Payment2',
+                                                               notification_url='/',
+                                                               delivery_information={
+                                                                   "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                   "logisticsProvider": "DHL",
+                                                                   "trackingNumber": "1234567890"
+                                                               })
+        self.assertEqual(paydirekt_capture2.status, 'SUCCESSFUL')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='CLOSED')
+        self.assertEqual(paydirekt_checkout.status, 'CLOSED')
+
+    def test_close_checkout_with_not_final_capture(self):
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+
+        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
+                                                              wrapper=self.paydirekt_wrapper,
+                                                              note='First payment',
+                                                              final=False,
+                                                              reference_number='Payment1',
+                                                              reconciliation_reference_number='Payment1',
+                                                              invoice_reference_number='Payment1',
+                                                              notification_url='/',
+                                                              delivery_information={
+                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                  "logisticsProvider": "DHL",
+                                                                  "trackingNumber": "1234567890"
+                                                              })
+        self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
+
+        self.assertTrue(paydirekt_checkout.close(self.paydirekt_wrapper))
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'CLOSED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='CLOSED')
+        self.assertEqual(paydirekt_checkout.status, 'CLOSED')
+
+    def test_refunds_with_not_final_capture(self):
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+
+        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
+                                                              wrapper=self.paydirekt_wrapper,
+                                                              note='First payment',
+                                                              final=False,
+                                                              reference_number='Payment1',
+                                                              reconciliation_reference_number='Payment1',
+                                                              invoice_reference_number='Payment1',
+                                                              notification_url='/',
+                                                              delivery_information={
+                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                  "logisticsProvider": "DHL",
+                                                                  "trackingNumber": "1234567890"
+                                                              })
+        self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_refund = paydirekt_checkout.create_refund(50, self.paydirekt_wrapper, note='test', reason='Test2', reference_number='1', reconciliation_reference_number='2')
+        self.assertEqual(paydirekt_refund.status, 'PENDING')
+
+    def test_too_high_refunds_with_not_final_capture(self):
+        paydirekt_checkout = self._create_order()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+
+        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
+                                                              wrapper=self.paydirekt_wrapper,
+                                                              note='First payment',
+                                                              final=False,
+                                                              reference_number='Payment1',
+                                                              reconciliation_reference_number='Payment1',
+                                                              invoice_reference_number='Payment1',
+                                                              notification_url='/',
+                                                              delivery_information={
+                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
+                                                                  "logisticsProvider": "DHL",
+                                                                  "trackingNumber": "1234567890"
+                                                              })
+        self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_refund = paydirekt_checkout.create_refund(200, self.paydirekt_wrapper, note='test', reason='Test2', reference_number='1', reconciliation_reference_number='2')
+        self.assertFalse(paydirekt_refund)
+
+    def _create_order(self):
+        return self.paydirekt_wrapper.init(
             payment_type='ORDER',
             total_amount=100,
             shipping_amount=3.5,
@@ -562,29 +493,51 @@ class TestPaydirektCheckouts(TestCase):
                 }
             ]
         )
-        self.assertEqual(paydirekt_checkout.status, 'OPEN')
-        self.assertEqual(paydirekt_checkout.total_amount, 100)
-        test_customer = TestCustomer()
-        test_customer.confirm_checkout(paydirekt_checkout)
 
-        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
-
-        paydirekt_checkout.refresh_from_db()
-        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=120,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=True,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
-        self.assertFalse(paydirekt_capture)
+    def _create_direct_sale(self):
+        return self.paydirekt_wrapper.init(
+            payment_type='DIRECT_SALE',
+            total_amount=100,
+            shipping_amount=3.5,
+            order_amount=96.5,
+            email_address='max@muster.de',
+            customer_number=123,
+            reconciliation_reference_number=124,
+            reference_number=125,
+            invoice_reference_number=126,
+            note='Your Test at django-paydirekt.',
+            minimum_age=18,
+            currency_code='EUR',
+            overcapture=False,
+            delivery_type='STANDARD',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            },
+            shipping_address={
+                'addresseeGivenName': 'Hermann',
+                'addresseeLastName': 'Meyer',
+                'street': 'Wieseneckstraße',
+                'streetNr': '26',
+                'zip': '90571',
+                'city': 'Schwaig bei Nürnberg',
+                'countryCode': 'DE'
+            },
+            items=[
+                {
+                    'quantity': 3,
+                    'name': 'Bobbycar',
+                    'ean': '800001303',
+                    'price': 25.99
+                },
+                {
+                    'quantity': 1,
+                    'name': 'Helm',
+                    'price': 18.53
+                }
+            ]
+        )
 
 
 class TestCustomer(object):

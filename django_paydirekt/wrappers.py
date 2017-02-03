@@ -142,6 +142,9 @@ class PaydirektWrapper(object):
             request.add_header('Accept', 'application/hal+json')
             request.add_header('Content-Length', data_len)
             request.add_data(data)
+        elif data == '':
+            request.method = 'POST'
+            request.add_data('')
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError as e:
