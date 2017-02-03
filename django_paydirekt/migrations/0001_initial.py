@@ -14,9 +14,9 @@ class Migration(migrations.Migration):
             name='PaydirektCapture',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('amount', models.DecimalField(verbose_name='total amount', max_digits=9, decimal_places=2)),
+                ('amount', models.DecimalField(verbose_name='amount', max_digits=9, decimal_places=2)),
                 ('transaction_id', models.CharField(unique=True, max_length=255, verbose_name='transaction id')),
-                ('final', models.BooleanField(verbose_name='final')),
+                ('final', models.BooleanField(default=False, verbose_name='final')),
                 ('link', models.URLField(verbose_name='link')),
                 ('status', models.CharField(max_length=255, verbose_name='status', blank=True)),
                 ('capture_type', models.CharField(max_length=255, verbose_name='capture type', blank=True)),
@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
                 ('last_modified', models.DateTimeField(auto_now=True, verbose_name='last modified')),
             ],
             options={
-                'ordering': ['-created_at'],
                 'verbose_name': 'Paydirekt checkout',
                 'verbose_name_plural': 'Paydirekt checkouts',
             },
@@ -34,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('checkout_id', models.CharField(unique=True, max_length=255, verbose_name='checkout id')),
-                ('payment_type', models.CharField(unique=True, max_length=255, verbose_name='checkout id')),
+                ('payment_type', models.CharField(max_length=255, verbose_name='payment type')),
                 ('total_amount', models.DecimalField(verbose_name='total amount', max_digits=9, decimal_places=2)),
                 ('status', models.CharField(max_length=255, verbose_name='status', blank=True)),
                 ('link', models.URLField(verbose_name='link')),
@@ -45,7 +44,6 @@ class Migration(migrations.Migration):
                 ('last_modified', models.DateTimeField(auto_now=True, verbose_name='last modified')),
             ],
             options={
-                'ordering': ['-created_at'],
                 'verbose_name': 'Paydirekt checkout',
                 'verbose_name_plural': 'Paydirekt checkouts',
             },

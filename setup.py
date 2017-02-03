@@ -30,7 +30,7 @@ def get_package_data(package):
     """
     walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
             for dirpath, dirnames, filenames in os.walk(package)
-            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
+            if 'tests' not in dirnames and not os.path.exists(os.path.join(dirpath, '__init__.py'))]
 
     filepaths = []
     for base, filenames in walk:
@@ -66,7 +66,7 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',

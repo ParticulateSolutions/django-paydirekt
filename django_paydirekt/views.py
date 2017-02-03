@@ -6,22 +6,32 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-from .models import PaydirektCheckout, PaydirektWrapper, PaydirektCapture
+from .wrappers import PaydirektWrapper
+from .models import PaydirektCapture, PaydirektCheckout
 
 
 class NotifyPaydirektView(View):
-    paydirekt_wrapper = PaydirektWrapper(auth={
-                            'API_SECRET': settings.PAYDIREKT_API_SECRET,
-                            'API_KEY': settings.PAYDIREKT_API_KEY,
-                        })
+    paydirekt_wrapper = PaydirektWrapper(
+        auth={
+            'API_SECRET': settings.PAYDIREKT_API_SECRET,
+            'API_KEY': settings.PAYDIREKT_API_KEY,
+        }
+    )
 
     def post(self, request, *args, **kwargs):
         request_data = json.loads(request.body)
+        if 'checkoutId' not in request_data:
+            return HttpResponse(status=400)
         checkout_id = request_data['checkoutId']
+
+        if 'merchantOrderReferenceNumber' not in request_data:
+            return HttpResponse(status=400)
         reference_number = request_data['merchantOrderReferenceNumber']
 
         if 'transactionId' in request_data:
             transaction_id = request_data['transactionId']
+            if 'captureStatus' not in request_data:
+                return HttpResponse(status=400)
             capture_status = request_data['captureStatus']
             try:
                 PaydirektCheckout.objects.get(checkout_id=checkout_id)
@@ -31,8 +41,10 @@ class NotifyPaydirektView(View):
                 paydirekt_capture = PaydirektCapture.objects.get(transaction_id=transaction_id)
             except PaydirektCapture.DoesNotExist:
                 return HttpResponse(status=400)
-            return self.handle_updated_capture(paydirekt_checkout=paydirekt_capture, expected_status=capture_status)
+            return self.handle_updated_capture(paydirekt_capture=paydirekt_capture, expected_status=capture_status)
         else:
+            if 'checkoutStatus' not in request_data:
+                return HttpResponse(status=400)
             checkout_status = request_data['checkoutStatus']
             try:
                 paydirekt_checkout = PaydirektCheckout.objects.get(checkout_id=checkout_id)
@@ -48,7 +60,7 @@ class NotifyPaydirektView(View):
         """
             Override to use the paydirekt_checkout in the way you want.
         """
-        updated_checkout = self.paydirekt_wrapper.update_checkout(paydirekt_checkout, expected_status=expected_status)
+        updated_checkout = paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status)
         if updated_checkout:
             if updated_checkout.status not in settings.PAYDIREKT_VALID_CHECKOUT_STATUS:
                 import logging
@@ -57,11 +69,11 @@ class NotifyPaydirektView(View):
             return HttpResponse(status=200)
         return HttpResponse(status=400)
 
-    def handle_updated_capture(self, paydirekt_checkout, expected_status=None):
+    def handle_updated_capture(self, paydirekt_capture, expected_status=None):
         """
             Override to use the paydirekt_capture in the way you want.
         """
-        updated_capture = self.paydirekt_wrapper.update_checkout(paydirekt_checkout, expected_status=expected_status)
+        updated_capture = paydirekt_capture.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status)
         if updated_capture:
             if updated_capture.status not in settings.PAYDIREKT_VALID_CAPTURE_STATUS:
                 import logging

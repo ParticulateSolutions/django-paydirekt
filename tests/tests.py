@@ -4,22 +4,21 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 import os
-import re
+import time
 import urllib2
 
-import logging
-
-import sys
-from django.conf import settings
-from django.conf.urls import url, include, patterns
-from django.test import TestCase, Client
 from pip._vendor.requests import Response
 
+from django.conf import settings
+from django.conf.urls import include, patterns, url
+from django.test import Client, TestCase
+from django_paydirekt.models import PaydirektCheckout
 from testfixtures import replace
 
-from django_paydirekt.models import PaydirektWrapper, PaydirektCheckout
-from django_paydirekt.test_response_mockups import TEST_RESPONSES
+from django_paydirekt.wrappers import PaydirektWrapper
+from .test_response_mockups import TEST_RESPONSES
 
 urlpatterns = patterns('',
     url('^paydirekt/', include('django_paydirekt.urls', namespace='paydirekt', app_name='paydirekt')),
@@ -71,20 +70,20 @@ class TestPaydirektNotifications(TestCase):
         })
 
     # testing valid checkout
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_get_notify(self):
         client = Client()
         response = client.get('/paydirekt/notify/')
         self.assertEqual(response.status_code, 405)
 
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_notify_callback_unknown_checkout(self):
         client = Client()
         post_data = {'checkoutId': '123-abc-notfound1', 'merchantOrderReferenceNumber': '123-abc-notfound1', 'checkoutStatus': 'OPEN'}
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_known_checkout_unknown_at_paydirekt(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-notfound-paydirekt')
@@ -92,7 +91,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_correct_status(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-approved')
@@ -100,7 +99,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 200)
 
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_correct_status_minimal(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-approved-minimal')
@@ -108,7 +107,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 200)
 
-    @replace('django_paydirekt.models.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_incorrect_status(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-expired')
@@ -205,7 +204,9 @@ class TestPaydirektCheckouts(TestCase):
         )
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 100)
-        self.paydirekt_wrapper.update_checkout(paydirekt_checkout, expected_status='OPEN')
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='OPEN')
+
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
 
@@ -257,6 +258,9 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
+
+        # give paydirekt time to approve
+        time.sleep(10)
 
         client = Client()
         post_data = {'checkoutId': paydirekt_checkout.checkout_id, 'merchantOrderReferenceNumber': '', 'checkoutStatus': 'APPROVED'}
@@ -313,7 +317,7 @@ class TestPaydirektCheckouts(TestCase):
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
 
-        self.paydirekt_wrapper.update_checkout(paydirekt_checkout=paydirekt_checkout, expected_status='APPROVED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
@@ -368,6 +372,9 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.total_amount, 100)
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
+
+        # give paydirekt time to approve
+        time.sleep(10)
 
         client = Client()
         post_data = {'checkoutId': paydirekt_checkout.checkout_id, 'merchantOrderReferenceNumber': '', 'checkoutStatus': 'APPROVED'}
@@ -424,7 +431,7 @@ class TestPaydirektCheckouts(TestCase):
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
 
-        self.paydirekt_wrapper.update_checkout(paydirekt_checkout=paydirekt_checkout, expected_status='APPROVED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
@@ -478,7 +485,7 @@ class TestPaydirektCheckouts(TestCase):
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
 
-        self.paydirekt_wrapper.update_checkout(paydirekt_checkout=paydirekt_checkout, expected_status='APPROVED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
@@ -560,7 +567,7 @@ class TestPaydirektCheckouts(TestCase):
         test_customer = TestCustomer()
         test_customer.confirm_checkout(paydirekt_checkout)
 
-        self.paydirekt_wrapper.update_checkout(paydirekt_checkout=paydirekt_checkout, expected_status='APPROVED')
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
@@ -584,7 +591,7 @@ class TestCustomer(object):
     obtain_token_url = 'https://api.sandbox.paydirekt.de/api/accountuser/v1/token/obtain'
     checkout_confirm_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}/confirm'
     checkout_detail_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}'
-    cafile = os.path.join(settings.PROJECT_ROOT, 'cacert.pem')
+    cafile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'cacert.pem')
 
     def confirm_checkout(self, paydirekt_checkout):
         checkout_id = paydirekt_checkout.checkout_id
