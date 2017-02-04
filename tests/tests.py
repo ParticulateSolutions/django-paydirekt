@@ -136,6 +136,7 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_checkout = self.paydirekt_wrapper.init(
             total_amount=1.00,
             reference_number='1',
+            payment_type='DIRECT_SALE',
             shopping_cart_type='ANONYMOUS_DONATION')
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
         self.assertEqual(paydirekt_checkout.total_amount, 1.00)
@@ -449,6 +450,18 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_refund = paydirekt_checkout.create_refund(200, self.paydirekt_wrapper, note='test', reason='Test2', reference_number='1', reconciliation_reference_number='2')
         self.assertFalse(paydirekt_refund)
 
+    def test_express_direct_sale(self):
+        paydirekt_checkout = self._create_express_direct_sale()
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 100)
+        # TODO find a way to approve it
+
+    def test_default_transactions(self):
+        transactions = self._get_default_transactions()
+        self.assertNotEqual(transactions, False)
+        print transactions
+
+    # create checkout helpers
     def _create_order(self):
         return self.paydirekt_wrapper.init(
             payment_type='ORDER',
@@ -538,6 +551,41 @@ class TestPaydirektCheckouts(TestCase):
                 }
             ]
         )
+
+    def _create_express_direct_sale(self):
+        return self.paydirekt_wrapper.init(
+            payment_type='DIRECT_SALE',
+            total_amount=100,
+            shipping_amount=6.99,
+            order_amount=93.01,
+            express=True,
+            email_address='max@muster.de',
+            customer_number=123,
+            reconciliation_reference_number=124,
+            reference_number=125,
+            invoice_reference_number=126,
+            note='Your Test at django-paydirekt.',
+            minimum_age=18,
+            currency_code='EUR',
+            overcapture=False,
+            delivery_type='STANDARD',
+            items=[
+                {
+                    'quantity': 3,
+                    'name': 'Bobbycar',
+                    'ean': '800001303',
+                    'price': 25.99
+                },
+                {
+                    'quantity': 1,
+                    'name': 'Helm',
+                    'price': 15.04
+                }
+            ]
+        )
+
+    def _get_default_transactions(self):
+        return self.paydirekt_wrapper.transactions()
 
 
 class TestCustomer(object):

@@ -24,6 +24,7 @@ class PaydirektWrapper(object):
     sandbox_url = django_paydirekt_settings.PAYDIREKT_SANDBOX_API_URL
     checkouts_url = django_paydirekt_settings.PAYDIREKT_CHECKOUTS_URL
     token_obtain_url = django_paydirekt_settings.PAYDIREKT_TOKEN_OBTAIN_URL
+    transactions_url = django_paydirekt_settings.PAYDIREKT_TRANSACTION_URL
 
     auth = None
 
@@ -33,18 +34,16 @@ class PaydirektWrapper(object):
         if django_paydirekt_settings.PAYDIREKT_SANDBOX:
             self.api_url = self.sandbox_url
 
-    def init(self, total_amount, reference_number,
+    def init(self, total_amount, reference_number, payment_type, currency_code='EUR',
+             success_url=django_paydirekt_settings.PAYDIREKT_SUCCESS_URL,
+             cancellation_url=django_paydirekt_settings.PAYDIREKT_CANCELLATION_URL,
+             rejection_url=django_paydirekt_settings.PAYDIREKT_REJECTION_URL,
+             notification_url=django_paydirekt_settings.PAYDIREKT_NOTIFICATION_URL,
+             overcapture=False,
              email_address=None,
-             payment_type='DIRECT_SALE',
-             currency_code='EUR',
-             success_url=settings.PAYDIREKT_SUCCESS_URL,
-             cancellation_url=settings.PAYDIREKT_CANCELLATION_URL,
-             rejection_url=settings.PAYDIREKT_REJECTION_URL,
-             notification_url=None,
              note=None,
              shipping_amount=None,
              order_amount=None,
-             overcapture=False,
              shopping_cart_type=None,
              delivery_information=None,
              delivery_type=None,
@@ -54,10 +53,14 @@ class PaydirektWrapper(object):
              minimum_age=None,
              minimum_age_fail_url=None,
              items=None,
-             customer_number=None):
+             customer_number=None,
+             express=False,
+             shipping_terms_url=django_paydirekt_settings.PAYDIREKT_SHIPPING_TERMS_URL,
+             check_destinations_url=django_paydirekt_settings.PAYDIREKT_NOTIFICATION_URL
+        ):
 
         if payment_type not in ('DIRECT_SALE', 'ORDER'):
-            raise RuntimeError('Unsupported Payment Type.')
+            return False
 
         success_url = build_paydirekt_full_uri(success_url)
         cancellation_url = build_paydirekt_full_uri(cancellation_url)
@@ -75,10 +78,20 @@ class PaydirektWrapper(object):
             'overcapture': overcapture,
         }
 
-        # optional fields
-        if notification_url:
-            notification_url = build_paydirekt_full_uri(notification_url)
-            checkout_data.update({'callbackUrlStatusUpdates': notification_url})
+        if express:
+            checkout_data.update({'express': True,
+                                  'callbackUrlCheckDestinations': build_paydirekt_full_uri(check_destinations_url),
+                                  'webUrlShippingTerms': build_paydirekt_full_uri(shipping_terms_url)})
+        else:
+            if shopping_cart_type != 'ANONYMOUS_DONATION' and shopping_cart_type != 'AUTHORITIES_PAYMENT' and not shipping_address:
+                return False
+            if shipping_address:
+                checkout_data.update({'shippingAddress': shipping_address})
+            if delivery_information:
+                checkout_data.update({'deliveryInformation': delivery_information})
+
+        notification_url = build_paydirekt_full_uri(notification_url)
+        checkout_data.update({'callbackUrlStatusUpdates': notification_url})
         if note:
             checkout_data.update({'note': note})
         if items:
@@ -89,12 +102,10 @@ class PaydirektWrapper(object):
             checkout_data.update({'orderAmount': order_amount})
         if shopping_cart_type:
             checkout_data.update({'shoppingCartType': shopping_cart_type})
-        if delivery_information:
-            checkout_data.update({'deliveryInformation': delivery_information})
-        if delivery_type:
-            checkout_data.update({'deliveryType': delivery_type})
         if shipping_address:
             checkout_data.update({'shippingAddress': shipping_address})
+        if delivery_type:
+            checkout_data.update({'deliveryType': delivery_type})
         if invoice_reference_number:
             checkout_data.update({'merchantInvoiceReferenceNumber': invoice_reference_number})
         if reconciliation_reference_number:
@@ -127,6 +138,37 @@ class PaydirektWrapper(object):
             )
         return False
 
+    def transactions(self,
+                     from_datetime=None,
+                     to_datetime=None,
+                     fields=None,
+                     reconciliation_references=None,
+                     payment_information_ids=None,
+                     merchant_reference_numbers=None,
+                     checkout_invoice_numbers=None,
+                     capture_invoice_numbers=None):
+        transactions_filters = {}
+        if from_datetime:
+            transactions_filters.update({'from': from_datetime.isoformat()})
+        if from_datetime:
+            transactions_filters.update({'to': to_datetime.isoformat()})
+        if fields:
+            transactions_filters.update({'fields': fields})
+        if reconciliation_references:
+            transactions_filters.update({'reconciliationReferences': reconciliation_references})
+        if payment_information_ids:
+            transactions_filters.update({'paymentInformationIds': payment_information_ids})
+        if merchant_reference_numbers:
+            transactions_filters.update({'merchantReferenceNumbers': merchant_reference_numbers})
+        if checkout_invoice_numbers:
+            transactions_filters.update({'checkoutInvoiceNumbers': checkout_invoice_numbers})
+        if capture_invoice_numbers:
+            transactions_filters.update({'captureInvoiceNumbers': capture_invoice_numbers})
+        transactions_response = self.call_api(self.transactions_url, data=transactions_filters)
+        if transactions_response and 'transactions' in transactions_response:
+            return transactions_response['transactions']
+        return False
+
     def call_api(self, url=None, access_token=None, data=None):
         if not url.lower().startswith('http'):
             url = '{0}{1}'.format(self.api_url, url)
@@ -139,12 +181,12 @@ class PaydirektWrapper(object):
             data = json.dumps(data)
             data_len = len(data)
             request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
-            request.add_header('Accept', 'application/hal+json')
             request.add_header('Content-Length', data_len)
             request.add_data(data)
         elif data == '':
             request.method = 'POST'
             request.add_data('')
+        request.add_header('Accept', 'application/json')
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError as e:
@@ -153,8 +195,10 @@ class PaydirektWrapper(object):
             body = fp.read()
             fp.close()
             if hasattr(e, 'code'):
+                print "Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body)
                 logger.error("Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body))
             else:
+                print "Paydirekt Error({0}): {1}".format(e.msg, body)
                 logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
         else:
             return json.load(response)
