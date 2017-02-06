@@ -116,11 +116,12 @@ class TestPaydirektNotifications(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def _create_test_checkout(self, checkout_id):
-        return PaydirektCheckout.objects.create(total_amount=1.0,
-                                                checkout_id=checkout_id,
-                                                status='OPEN',
-                                                link='https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/'+checkout_id+'/',
-                                                approve_link ='https://sandbox.paydirekt.de/checkout/#/checkout/'+checkout_id)
+        return PaydirektCheckout.objects.create(
+            total_amount=1.0,
+            checkout_id=checkout_id,
+            status='OPEN',
+            link='https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/'+checkout_id+'/',
+            approve_link ='https://sandbox.paydirekt.de/checkout/#/checkout/'+checkout_id)
 
 
 class TestPaydirektCheckouts(TestCase):
@@ -238,33 +239,35 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=False,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
-        paydirekt_capture2 = paydirekt_checkout.create_capture(amount=50,
-                                                               wrapper=self.paydirekt_wrapper,
-                                                               note='Second payment',
-                                                               final=True,
-                                                               reference_number='Payment2',
-                                                               reconciliation_reference_number='Payment2',
-                                                               invoice_reference_number='Payment2',
-                                                               notification_url='/',
-                                                               delivery_information={
-                                                                   "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                   "logisticsProvider": "DHL",
-                                                                   "trackingNumber": "1234567890"
-                                                               })
+        paydirekt_capture2 = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='Second payment',
+            final=True,
+            reference_number='Payment2',
+            reconciliation_reference_number='Payment2',
+            invoice_reference_number='Payment2',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
         self.assertEqual(paydirekt_capture2.status, 'SUCCESSFUL')
 
     def test_create_capture_too_high(self):
@@ -278,19 +281,20 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=120,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=True,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=120,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
         self.assertFalse(paydirekt_capture)
 
     def test_close_checkout_without_captures(self):
@@ -322,33 +326,35 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=False,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
-        paydirekt_capture2 = paydirekt_checkout.create_capture(amount=50,
-                                                               wrapper=self.paydirekt_wrapper,
-                                                               note='Second payment',
-                                                               final=True,
-                                                               reference_number='Payment2',
-                                                               reconciliation_reference_number='Payment2',
-                                                               invoice_reference_number='Payment2',
-                                                               notification_url='/',
-                                                               delivery_information={
-                                                                   "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                   "logisticsProvider": "DHL",
-                                                                   "trackingNumber": "1234567890"
-                                                               })
+        paydirekt_capture2 = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='Second payment',
+            final=True,
+            reference_number='Payment2',
+            reconciliation_reference_number='Payment2',
+            invoice_reference_number='Payment2',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
         self.assertEqual(paydirekt_capture2.status, 'SUCCESSFUL')
         paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='CLOSED')
         self.assertEqual(paydirekt_checkout.status, 'CLOSED')
@@ -365,19 +371,21 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=False,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
+
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
 
         self.assertTrue(paydirekt_checkout.close(self.paydirekt_wrapper))
@@ -398,24 +406,32 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=False,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
+
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
 
         paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
 
-        paydirekt_refund = paydirekt_checkout.create_refund(50, self.paydirekt_wrapper, note='test', reason='Test2', reference_number='1', reconciliation_reference_number='2')
+        paydirekt_refund = paydirekt_checkout.create_refund(
+            amount=50,
+            paydirekt_wrapper=self.paydirekt_wrapper,
+            note='test',
+            reason='Test2',
+            reference_number='1',
+            reconciliation_reference_number='2')
         self.assertEqual(paydirekt_refund.status, 'PENDING')
 
     def test_too_high_refunds_with_not_final_capture(self):
@@ -430,19 +446,21 @@ class TestPaydirektCheckouts(TestCase):
         paydirekt_checkout.refresh_from_db()
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
 
-        paydirekt_capture = paydirekt_checkout.create_capture(amount=50,
-                                                              wrapper=self.paydirekt_wrapper,
-                                                              note='First payment',
-                                                              final=False,
-                                                              reference_number='Payment1',
-                                                              reconciliation_reference_number='Payment1',
-                                                              invoice_reference_number='Payment1',
-                                                              notification_url='/',
-                                                              delivery_information={
-                                                                  "expectedShippingDate": "2016-10-19T12:00:00Z",
-                                                                  "logisticsProvider": "DHL",
-                                                                  "trackingNumber": "1234567890"
-                                                              })
+        paydirekt_capture = paydirekt_checkout.create_capture(
+            amount=50,
+            wrapper=self.paydirekt_wrapper,
+            note='First payment',
+            final=False,
+            reference_number='Payment1',
+            reconciliation_reference_number='Payment1',
+            invoice_reference_number='Payment1',
+            notification_url='/',
+            delivery_information={
+                "expectedShippingDate": "2016-10-19T12:00:00Z",
+                "logisticsProvider": "DHL",
+                "trackingNumber": "1234567890"
+            })
+
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
 
         paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
