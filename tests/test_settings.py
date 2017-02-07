@@ -19,6 +19,10 @@ settings.configure(
         'django_paydirekt',
         'tests',
     ),
+
+    PAYDIREKT=True,
+    PAYDIREKT_ROOT_URL='http://example.com',
+
     PAYDIREKT_API_KEY="e81d298b-60dd-4f46-9ec9-1dbc72f5b5df",
     PAYDIREKT_API_SECRET="GJlN718sQxN1unxbLWHVlcf0FgXw2kMyfRwD0mgTRME=",
     

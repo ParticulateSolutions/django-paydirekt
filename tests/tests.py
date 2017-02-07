@@ -11,18 +11,13 @@ import urllib2
 
 from pip._vendor.requests import Response
 
-from django.conf import settings
-from django.conf.urls import include, patterns, url
 from django.test import Client, TestCase
 from django_paydirekt.models import PaydirektCheckout
 from testfixtures import replace
 
 from django_paydirekt.wrappers import PaydirektWrapper
+from django_paydirekt import settings as django_paydirekt_settings
 from .test_response_mockups import TEST_RESPONSES
-
-urlpatterns = patterns('',
-    url('^paydirekt/', include('django_paydirekt.urls', namespace='paydirekt', app_name='paydirekt')),
-)
 
 
 def mock_generate_uuid(length=12):
@@ -65,8 +60,8 @@ class TestPaydirektNotifications(TestCase):
 
     def setUp(self):
         self.paydirekt_wrapper = PaydirektWrapper(auth={
-            'API_SECRET': settings.PAYDIREKT_API_SECRET,
-            'API_KEY': settings.PAYDIREKT_API_KEY,
+            'API_SECRET': django_paydirekt_settings.PAYDIREKT_API_SECRET,
+            'API_KEY': django_paydirekt_settings.PAYDIREKT_API_KEY,
         })
 
     # testing valid checkout
@@ -129,8 +124,8 @@ class TestPaydirektCheckouts(TestCase):
 
     def setUp(self):
         self.paydirekt_wrapper = PaydirektWrapper(auth={
-            'API_SECRET': settings.PAYDIREKT_API_SECRET,
-            'API_KEY': settings.PAYDIREKT_API_KEY,
+            'API_SECRET': django_paydirekt_settings.PAYDIREKT_API_SECRET,
+            'API_KEY': django_paydirekt_settings.PAYDIREKT_API_KEY,
         })
 
     def test_minimal_valid_anonymous_donation_checkout(self):
@@ -241,7 +236,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',
@@ -256,7 +251,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
         paydirekt_capture2 = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='Second payment',
             final=True,
             reference_number='Payment2',
@@ -283,7 +278,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_checkout.status, 'APPROVED')
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=120,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',
@@ -328,7 +323,7 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',
@@ -343,7 +338,7 @@ class TestPaydirektCheckouts(TestCase):
         self.assertEqual(paydirekt_capture.status, 'SUCCESSFUL')
         paydirekt_capture2 = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='Second payment',
             final=True,
             reference_number='Payment2',
@@ -373,7 +368,7 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',
@@ -408,7 +403,7 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',
@@ -448,7 +443,7 @@ class TestPaydirektCheckouts(TestCase):
 
         paydirekt_capture = paydirekt_checkout.create_capture(
             amount=50,
-            wrapper=self.paydirekt_wrapper,
+            paydirekt_wrapper=self.paydirekt_wrapper,
             note='First payment',
             final=False,
             reference_number='Payment1',

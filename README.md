@@ -18,6 +18,9 @@ There are just two steps needed to install django-paydirekt:
     # django-paydirekt
     INSTALLED_APPS += ('django_paydirekt', )
 
+    PAYDIREKT = True
+    PAYDIREKT_ROOT_URL = 'http://example.com'
+
     # Those are dummy test data - change to your data
     PAYDIREKT_API_KEY = "Your-Paydirekt-API-key"
     PAYDIREKT_API_SECRET = "Your-Paydirekt-API-secret"

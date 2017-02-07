@@ -3,7 +3,8 @@ from django.conf import settings
 
 DJANGO_PAYDIREKT_VERSION = __version__
 
-PAYDIREKT_ROOT_URL = 'https://example.com'
+PAYDIREKT_API_SECRET = getattr(settings, 'PAYDIREKT_API_SECRET', False)
+PAYDIREKT_API_KEY = getattr(settings, 'PAYDIREKT_API_KEY', False)
 
 PAYDIREKT_API_URL = getattr(settings, 'PAYDIREKT_API_URL', 'https://api.paydirekt.de')
 PAYDIREKT_SANDBOX_API_URL = getattr(settings, 'PAYDIREKT_API_URL', 'https://api.sandbox.paydirekt.de')
@@ -34,3 +35,6 @@ PAYDIREKT_VALID_COUNTRY_CODES = getattr(settings, 'PAYDIREKT_VALID_COUNTRY_CODES
 PAYDIREKT_VALID_ZIP_CODES = getattr(settings, 'PAYDIREKT_VALID_COUNTRY_CODES', ['*'])
 PAYDIREKT_VALID_PACKSTATION = getattr(settings, 'PAYDIREKT_VALID_PACKSTATION', True)
 PAYDIREKT_SHIPPING_TERMS_URL = getattr(settings, 'PAYDIREKT_SHIPPING_TERMS_URL', '/')
+
+if getattr(settings, 'PAYDIREKT', False):
+    PAYDIREKT_ROOT_URL = settings.PAYDIREKT_ROOT_URL

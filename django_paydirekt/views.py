@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
@@ -12,12 +11,10 @@ from django_paydirekt import settings as django_paydirekt_settings
 
 
 class NotifyPaydirektView(View):
-    paydirekt_wrapper = PaydirektWrapper(
-        auth={
-            'API_SECRET': settings.PAYDIREKT_API_SECRET,
-            'API_KEY': settings.PAYDIREKT_API_KEY,
-        }
-    )
+    paydirekt_wrapper = PaydirektWrapper(auth={
+        'API_SECRET': django_paydirekt_settings.PAYDIREKT_API_SECRET,
+        'API_KEY': django_paydirekt_settings.PAYDIREKT_API_KEY,
+    })
 
     def post(self, request, *args, **kwargs):
         request_data = json.loads(request.body)
@@ -128,7 +125,7 @@ class NotifyPaydirektView(View):
         """
         updated_checkout = paydirekt_checkout
         if updated_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
-            if updated_checkout.status not in settings.PAYDIREKT_VALID_CHECKOUT_STATUS:
+            if updated_checkout.status not in django_paydirekt_settings.PAYDIREKT_VALID_CHECKOUT_STATUS:
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(_('Paydirekt: Status of checkout {} is now {}').format(updated_checkout.checkout_id, updated_checkout.status))
@@ -141,7 +138,7 @@ class NotifyPaydirektView(View):
         """
         updated_capture = paydirekt_capture
         if updated_capture.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
-            if updated_capture.status not in settings.PAYDIREKT_VALID_CAPTURE_STATUS:
+            if updated_capture.status not in django_paydirekt_settings.PAYDIREKT_VALID_CAPTURE_STATUS:
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(_('Paydirekt: Status of capture {} is now {}').format(updated_capture.checkout_id, updated_capture.status))

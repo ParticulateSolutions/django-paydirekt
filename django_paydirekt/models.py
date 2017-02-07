@@ -11,7 +11,7 @@ from django_paydirekt.utils import build_paydirekt_full_uri
 @python_2_unicode_compatible
 class PaydirektCheckout(models.Model):
     checkout_id = models.CharField(_("checkout id"), max_length=255, unique=True)
-    payment_type = models.CharField(_("payment type"), max_length=255, unique=True)
+    payment_type = models.CharField(_("payment type"), max_length=255)
     total_amount = models.DecimalField(_("total amount"), max_digits=9, decimal_places=2)
     status = models.CharField(_("status"), max_length=255, blank=True)
     link = models.URLField(_("link"))
@@ -33,7 +33,7 @@ class PaydirektCheckout(models.Model):
 
     def create_capture(self,
                        amount,
-                       wrapper,
+                       paydirekt_wrapper,
                        note=None,
                        final=False,
                        reference_number=None,
@@ -60,7 +60,7 @@ class PaydirektCheckout(models.Model):
         if delivery_information:
             capture_data.update({'deliveryInformation': delivery_information})
 
-        capture_response = wrapper.call_api(url=self.captures_link, data=capture_data)
+        capture_response = paydirekt_wrapper.call_api(url=self.captures_link, data=capture_data)
 
         if capture_response and 'amount' in capture_response and capture_response['amount'] == float(amount):
             return PaydirektCapture.objects.create(
@@ -77,7 +77,7 @@ class PaydirektCheckout(models.Model):
 
     def create_refund(self,
                        amount,
-                       wrapper,
+                       paydirekt_wrapper,
                        note=None,
                        reason=None,
                        reference_number=None,
@@ -96,7 +96,7 @@ class PaydirektCheckout(models.Model):
         if reconciliation_reference_number:
             refund_data.update({'merchantReconciliationReferenceNumber': reconciliation_reference_number})
 
-        refund_response = wrapper.call_api(url=self.refunds_link, data=refund_data)
+        refund_response = paydirekt_wrapper.call_api(url=self.refunds_link, data=refund_data)
 
         if refund_response and 'amount' in refund_response and refund_response['amount'] == float(amount):
             return PaydirektRefund.objects.create(
@@ -110,18 +110,18 @@ class PaydirektCheckout(models.Model):
         else:
             return False
 
-    def close(self, wrapper):
+    def close(self, paydirekt_wrapper):
         if not self.close_link:
             return False
-        close_response = wrapper.call_api(url=self.close_link, data='')
+        close_response = paydirekt_wrapper.call_api(url=self.close_link, data='')
         if close_response and 'status' in close_response and close_response['status'] == 'CLOSED':
             self.status = 'CLOSED'
             self.save()
             return True
         return False
 
-    def refresh_from_paydirekt(self, wrapper, expected_status=None):
-        checkout_response = wrapper.call_api(url=self.link)
+    def refresh_from_paydirekt(self, paydirekt_wrapper, expected_status=None):
+        checkout_response = paydirekt_wrapper.call_api(url=self.link)
         if not checkout_response:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Checkout Link not available: {}".format(self.link))
@@ -168,8 +168,8 @@ class PaydirektCapture(models.Model):
         verbose_name = _("Paydirekt Capture")
         verbose_name_plural = _("Paydirekt Captures")
 
-    def refresh_from_paydirekt(self, wrapper, expected_status=None):
-        capture_response = wrapper.call_api(url=self.link)
+    def refresh_from_paydirekt(self, paydirekt_wrapper, expected_status=None):
+        capture_response = paydirekt_wrapper.call_api(url=self.link)
         if not capture_response:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Capture Link not available: {}".format(self.link))
@@ -207,8 +207,8 @@ class PaydirektRefund(models.Model):
         verbose_name = _("Paydirekt Refund")
         verbose_name_plural = _("Paydirekt Refund")
 
-    def refresh_from_paydirekt(self, wrapper, expected_status=None):
-        refund_response = wrapper.call_api(url=self.link)
+    def refresh_from_paydirekt(self, paydirekt_wrapper, expected_status=None):
+        refund_response = paydirekt_wrapper.call_api(url=self.link)
         if not refund_response:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Refund Link not available: {}".format(self.link))

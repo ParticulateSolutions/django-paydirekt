@@ -12,6 +12,7 @@ import urllib2
 import uuid
 
 from django.conf import settings
+
 from django_paydirekt import settings as django_paydirekt_settings
 from django_paydirekt.models import PaydirektCheckout
 from django_paydirekt.utils import build_paydirekt_full_uri
@@ -30,9 +31,10 @@ class PaydirektWrapper(object):
 
     def __init__(self, auth=None):
         super(PaydirektWrapper, self).__init__()
-        self.auth = auth
-        if django_paydirekt_settings.PAYDIREKT_SANDBOX:
-            self.api_url = self.sandbox_url
+        if getattr(settings, 'PAYDIREKT', False):
+            self.auth = auth
+            if django_paydirekt_settings.PAYDIREKT_SANDBOX:
+                self.api_url = self.sandbox_url
 
     def init(self, total_amount, reference_number, payment_type, currency_code='EUR',
              success_url=django_paydirekt_settings.PAYDIREKT_SUCCESS_URL,
@@ -58,6 +60,9 @@ class PaydirektWrapper(object):
              shipping_terms_url=django_paydirekt_settings.PAYDIREKT_SHIPPING_TERMS_URL,
              check_destinations_url=django_paydirekt_settings.PAYDIREKT_NOTIFICATION_URL
         ):
+
+        if not self.auth:
+            return False
 
         if payment_type not in ('DIRECT_SALE', 'ORDER'):
             return False
@@ -147,6 +152,8 @@ class PaydirektWrapper(object):
                      merchant_reference_numbers=None,
                      checkout_invoice_numbers=None,
                      capture_invoice_numbers=None):
+        if not self.auth:
+            return False
         transactions_filters = {}
         if from_datetime:
             transactions_filters.update({'from': from_datetime.isoformat()})
@@ -170,6 +177,8 @@ class PaydirektWrapper(object):
         return False
 
     def call_api(self, url=None, access_token=None, data=None):
+        if not self.auth:
+            return False
         if not url.lower().startswith('http'):
             url = '{0}{1}'.format(self.api_url, url)
         request = urllib2.Request(url)

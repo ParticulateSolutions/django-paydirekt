@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('checkout_id', models.CharField(unique=True, max_length=255, verbose_name='checkout id')),
-                ('payment_type', models.CharField(unique=True, max_length=255, verbose_name='payment type')),
+                ('payment_type', models.CharField(max_length=255, verbose_name='payment type')),
                 ('total_amount', models.DecimalField(verbose_name='total amount', max_digits=9, decimal_places=2)),
                 ('status', models.CharField(max_length=255, verbose_name='status', blank=True)),
                 ('link', models.URLField(verbose_name='link')),
