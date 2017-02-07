@@ -116,7 +116,7 @@ class TestPaydirektNotifications(TestCase):
             checkout_id=checkout_id,
             status='OPEN',
             link='https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/'+checkout_id+'/',
-            approve_link ='https://sandbox.paydirekt.de/checkout/#/checkout/'+checkout_id)
+            approve_link='https://sandbox.paydirekt.de/checkout/#/checkout/'+checkout_id)
 
 
 class TestPaydirektCheckouts(TestCase):
@@ -130,12 +130,39 @@ class TestPaydirektCheckouts(TestCase):
 
     def test_minimal_valid_anonymous_donation_checkout(self):
         paydirekt_checkout = self.paydirekt_wrapper.init(
-            total_amount=1.00,
+            total_amount=15.00,
             reference_number='1',
             payment_type='DIRECT_SALE',
             shopping_cart_type='ANONYMOUS_DONATION')
         self.assertEqual(paydirekt_checkout.status, 'OPEN')
-        self.assertEqual(paydirekt_checkout.total_amount, 1.00)
+        self.assertEqual(paydirekt_checkout.total_amount, 15.00)
+
+    def test_minimal_valid_anonymous_donation_checkout_refund(self):
+        paydirekt_checkout = self.paydirekt_wrapper.init(
+            total_amount=15.00,
+            reference_number='1',
+            payment_type='DIRECT_SALE',
+            shopping_cart_type='ANONYMOUS_DONATION')
+        self.assertEqual(paydirekt_checkout.status, 'OPEN')
+        self.assertEqual(paydirekt_checkout.total_amount, 15.00)
+        test_customer = TestCustomer()
+        test_customer.confirm_checkout(paydirekt_checkout)
+
+        paydirekt_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status='APPROVED')
+
+        paydirekt_checkout.refresh_from_db()
+        self.assertEqual(paydirekt_checkout.status, 'APPROVED')
+        self.assertNotEqual(paydirekt_checkout.refunds_link, '')
+        time.sleep(2)
+        paydirekt_checkout.refresh_from_paydirekt(paydirekt_wrapper=self.paydirekt_wrapper)
+        paydirekt_refund = paydirekt_checkout.create_refund(
+            amount=15.00,
+            paydirekt_wrapper=self.paydirekt_wrapper,
+            note='test',
+            reason='Test2',
+            reference_number='1',
+            reconciliation_reference_number='2')
+        self.assertEqual(paydirekt_refund.status, 'PENDING')
 
     def test_minimal_valid_direct_sale_checkout(self):
         paydirekt_checkout = self.paydirekt_wrapper.init(
