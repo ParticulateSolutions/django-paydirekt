@@ -129,6 +129,7 @@ class NotifyPaydirektView(View):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(_('Paydirekt: Status of checkout {} is now {}').format(updated_checkout.checkout_id, updated_checkout.status))
+                return HttpResponse(status=400)
             return HttpResponse(status=200)
         return HttpResponse(status=400)
 
@@ -142,5 +143,6 @@ class NotifyPaydirektView(View):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(_('Paydirekt: Status of capture {} is now {}').format(updated_capture.checkout_id, updated_capture.status))
+                return HttpResponse(status=400)
             return HttpResponse(status=200)
         return HttpResponse(status=400)

@@ -141,9 +141,10 @@ PAYDIREKT_CHECKOUTS_URL = getattr(settings, 'PAYDIREKT_CHECKOUTS_URL', '/api/che
 PAYDIREKT_TOKEN_OBTAIN_URL = getattr(settings, 'PAYDIREKT_TOKEN_OBTAIN_URL', '/api/merchantintegration/v1/token/obtain')
 PAYDIREKT_TRANSACTION_URL = getattr(settings, 'PAYDIREKT_TRANSACTION_URL', '/api/reporting/v1/reports/transactions')
 
-PAYDIREKT_VALID_CAPTURE_STATUS = getattr(settings, 'PAYDIREKT_VALID_CAPTURE_STATUS', ['PENDING', 'SUCCESSFUL'])
-PAYDIREKT_VALID_CHECKOUT_STATUS = getattr(settings, 'PAYDIREKT_VALID_CHECKOUT_STATUS', ['OPEN', 'PENDING', 'APPROVED'])
-PAYDIREKT_VALID_REFUND_STATUS = getattr(settings, 'PAYDIREKT_VALID_REFUND_STATUS', ['PENDING', 'SUCCESSFUL'])
+PAYDIREKT_VALID_CAPTURE_STATUS = getattr(settings, 'PAYDIREKT_VALID_CAPTURE_STATUS', ['PENDING', 'SUCCESSFUL', 'REJECTED'])
+PAYDIREKT_VALID_CHECKOUT_STATUS = getattr(settings, 'PAYDIREKT_VALID_CHECKOUT_STATUS', ['OPEN', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELED', 'CLOSED', 'EXPIRED'])
+PAYDIREKT_VALID_REFUND_STATUS = getattr(settings, 'PAYDIREKT_VALID_REFUND_STATUS', ['PENDING', 'SUCCESSFUL', 'ERROR', 'FAILED'])
+
 PAYDIREKT_SHIPPING_OPTIONS = [{
     'code': 'DHL_PAKET',
     'name': 'DHL Paket',
@@ -183,7 +184,8 @@ class MyNotifyPaydirektView(NotifyPaydirektView):
         if updated_checkout.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
             if updated_checkout.status not in settings.PAYDIREKT_VALID_CHECKOUT_STATUS:
                 # do something
-             # do something else
+                return HttpResponse(status=400)
+            # do something else
             return HttpResponse(status=200)
         return HttpResponse(status=400)
 
@@ -194,6 +196,7 @@ class MyNotifyPaydirektView(NotifyPaydirektView):
         if updated_capture.refresh_from_paydirekt(self.paydirekt_wrapper, expected_status=expected_status):
             if updated_capture.status not in settings.PAYDIREKT_VALID_CAPTURE_STATUS:
                 # do something
+                return HttpResponse(status=400)
             # do something else
             return HttpResponse(status=200)
         return HttpResponse(status=400)
