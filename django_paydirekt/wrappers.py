@@ -204,10 +204,8 @@ class PaydirektWrapper(object):
             body = fp.read()
             fp.close()
             if hasattr(e, 'code'):
-                print "Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body)
                 logger.error("Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body))
             else:
-                print "Paydirekt Error({0}): {1}".format(e.msg, body)
                 logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
         else:
             return json.load(response)
