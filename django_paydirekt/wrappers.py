@@ -218,7 +218,7 @@ class PaydirektWrapper(object):
             else:
                 logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
         else:
-            return json.load(response)
+            return json.loads(response.read().decode('utf-8'))
         return False
 
     def _get_access_token(self):
@@ -269,7 +269,7 @@ class PaydirektWrapper(object):
             else:
                 logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
         else:
-            return json.load(response)['access_token']
+            return json.loads(response.read().decode('utf-8'))['access_token']
 
     def _format_timestamp_for_header(self, timestamp):
         weekdayname = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
