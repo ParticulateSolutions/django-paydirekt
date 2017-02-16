@@ -17,7 +17,7 @@ class NotifyPaydirektView(View):
     })
 
     def post(self, request, *args, **kwargs):
-        request_data = json.loads(request.body)
+        request_data = json.loads(request.body.decode('utf-8'))
 
         # general attributes
         if 'checkoutId' not in request_data:
