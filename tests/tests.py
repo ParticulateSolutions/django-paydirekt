@@ -499,7 +499,6 @@ class TestPaydirektCheckouts(TestCase):
     def test_default_transactions(self):
         transactions = self._get_default_transactions()
         self.assertNotEqual(transactions, False)
-        print transactions
 
     # create checkout helpers
     def _create_order(self):
