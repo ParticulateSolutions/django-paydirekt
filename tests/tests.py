@@ -60,7 +60,7 @@ class MockResponse(Response):
         self.response = json.dumps(response)
 
     def read(self):
-        return self.response
+        return self.response.encode('utf-8')
 
 
 class TestPaydirektNotifications(TestCase):
