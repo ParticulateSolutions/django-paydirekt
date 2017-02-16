@@ -1,5 +1,6 @@
-from __init__ import __version__
 from django.conf import settings
+
+from django_paydirekt.__init__ import __version__
 
 DJANGO_PAYDIREKT_VERSION = __version__
 
