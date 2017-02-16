@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 .idea
 sqlite.db
+venv3

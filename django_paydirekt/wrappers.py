@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import random
 import string
 import time
@@ -28,6 +29,7 @@ except ImportError:
 
 class PaydirektWrapper(object):
     interface_version = 'django_paydirekt_v{}'.format(django_paydirekt_settings.DJANGO_PAYDIREKT_VERSION)
+    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_paydirekt')), 'cacert.pem')
 
     api_url = django_paydirekt_settings.PAYDIREKT_API_URL
     sandbox_url = django_paydirekt_settings.PAYDIREKT_SANDBOX_API_URL
@@ -130,9 +132,9 @@ class PaydirektWrapper(object):
             checkout_data.update({'merchantCustomerNumber': customer_number})
         if email_address:
             sha256_hashed_email_address = hashlib.sha256()
-            sha256_hashed_email_address.update(bytes(email_address))
+            sha256_hashed_email_address.update(email_address.encode(encoding='utf-8'))
             sha256_hashed_email_address = base64.b64encode(sha256_hashed_email_address.digest())
-            checkout_data.update({'sha256hashedEmailAddress': sha256_hashed_email_address})
+            checkout_data.update({'sha256hashedEmailAddress': str(sha256_hashed_email_address)})
 
         checkout_response = self.call_api(url=self.checkouts_url, data=checkout_data)
         if checkout_response and 'totalAmount' in checkout_response and checkout_response['totalAmount'] == float(
@@ -199,13 +201,13 @@ class PaydirektWrapper(object):
             data_len = len(data)
             request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
             request.add_header('Content-Length', data_len)
-            request.add_data(data)
+            request.data = data.encode(encoding='utf-8')
         elif data == '':
             request.method = 'POST'
-            request.add_data('')
+            request.data = ''.encode(encoding='utf-8')
         request.add_header('Accept', 'application/json')
         try:
-            response = urlopen(request)
+            response = urlopen(request, cafile=self.cafile)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
@@ -235,8 +237,8 @@ class PaydirektWrapper(object):
                                                    random_nonce)
 
         signature = base64.urlsafe_b64encode(hmac.new(
-            base64.urlsafe_b64decode(bytes(self.auth['API_SECRET'])),
-            bytes(signature_plain),
+            base64.urlsafe_b64decode(self.auth['API_SECRET'].encode(encoding='utf-8')),
+            signature_plain.encode(encoding='utf-8'),
             hashlib.sha256
         ).digest())
 
@@ -253,10 +255,10 @@ class PaydirektWrapper(object):
         request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
         request.add_header('Accept', 'application/hal+json')
         request.add_header('Content-Length', data_len)
-        request.add_data(data)
+        request.data = data.encode(encoding='utf-8')
 
         try:
-            response = urlopen(request)
+            response = urlopen(request, cafile=self.cafile)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp

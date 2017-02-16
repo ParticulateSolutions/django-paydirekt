@@ -32,7 +32,7 @@ def mock_generate_uuid(length=12):
     return '12345678901234567890'
 
 
-def mock_urlopen(request):
+def mock_urlopen(request, cafile=None):
     response = {}
     url = request.get_full_url()
     try:
@@ -639,7 +639,7 @@ class TestCustomer(object):
     obtain_token_url = 'https://api.sandbox.paydirekt.de/api/accountuser/v1/token/obtain'
     checkout_confirm_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}/confirm'
     checkout_detail_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}'
-    cafile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'cacert.pem')
+    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_paydirekt')), 'cacert.pem')
 
     def confirm_checkout(self, paydirekt_checkout):
         checkout_id = paydirekt_checkout.checkout_id
@@ -670,7 +670,7 @@ class TestCustomer(object):
         request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
         request.add_header('Accept', 'application/hal+json')
         request.add_header('User-Agent', 'Mozilla/5.0')
-        request.add_data('')
+        request.data = ''.encode(encoding='utf-8')
         try:
             response = urlopen(request, cafile=self.cafile)
         except HTTPError as e:
@@ -695,9 +695,9 @@ class TestCustomer(object):
             'username': 'github_testuser',
             'grantType': 'password'
         }
-        request.add_data(json.dumps(data))
+        request.data = json.dumps(data).encode(encoding='utf-8')
         try:
-            response = urlopen(request)
+            response = urlopen(request, cafile=self.cafile)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
