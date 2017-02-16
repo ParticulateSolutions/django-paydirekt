@@ -9,14 +9,14 @@ import os
 import time
 import urllib2
 
-from pip._vendor.requests import Response
-
 from django.test import Client, TestCase
-from django_paydirekt.models import PaydirektCheckout
+from pip._vendor.requests import Response
 from testfixtures import replace
 
-from django_paydirekt.wrappers import PaydirektWrapper
 from django_paydirekt import settings as django_paydirekt_settings
+from django_paydirekt.models import PaydirektCheckout
+from django_paydirekt.wrappers import PaydirektWrapper
+
 from .test_response_mockups import TEST_RESPONSES
 
 
