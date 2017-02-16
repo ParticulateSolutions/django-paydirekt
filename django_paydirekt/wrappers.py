@@ -8,7 +8,6 @@ import logging
 import random
 import string
 import time
-import urllib2
 import uuid
 
 from django.conf import settings
@@ -16,6 +15,15 @@ from django.conf import settings
 from django_paydirekt import settings as django_paydirekt_settings
 from django_paydirekt.models import PaydirektCheckout
 from django_paydirekt.utils import build_paydirekt_full_uri
+
+try:
+    # For Python 3.0 and later
+    from urllib.error import HTTPError
+    from urllib.request import urlopen
+    from urllib.request import Request
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import HTTPError, Request, urlopen
 
 
 class PaydirektWrapper(object):
@@ -181,7 +189,7 @@ class PaydirektWrapper(object):
             return False
         if not url.lower().startswith('http'):
             url = '{0}{1}'.format(self.api_url, url)
-        request = urllib2.Request(url)
+        request = Request(url)
 
         if access_token is None:
             access_token = self._get_access_token()
@@ -197,8 +205,8 @@ class PaydirektWrapper(object):
             request.add_data('')
         request.add_header('Accept', 'application/json')
         try:
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError as e:
+            response = urlopen(request)
+        except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
@@ -232,7 +240,7 @@ class PaydirektWrapper(object):
             hashlib.sha256
         ).digest())
 
-        request = urllib2.Request(url = '{0}{1}'.format(self.api_url, self.token_obtain_url))
+        request = Request(url='{0}{1}'.format(self.api_url, self.token_obtain_url))
         # preparing request
         request.add_header('X-Date', formatted_timestamp_header)
         request.add_header('X-Request-ID', request_id)
@@ -248,8 +256,8 @@ class PaydirektWrapper(object):
         request.add_data(data)
 
         try:
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError as e:
+            response = urlopen(request)
+        except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()

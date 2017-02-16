@@ -7,7 +7,6 @@ import json
 import logging
 import os
 import time
-import urllib2
 
 from django.test import Client, TestCase
 from pip._vendor.requests import Response
@@ -18,6 +17,15 @@ from django_paydirekt.models import PaydirektCheckout
 from django_paydirekt.wrappers import PaydirektWrapper
 
 from .test_response_mockups import TEST_RESPONSES
+
+try:
+    # For Python 3.0 and later
+    from urllib.error import HTTPError
+    from urllib.request import urlopen
+    from urllib.request import Request
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import HTTPError, Request, urlopen
 
 
 def mock_generate_uuid(length=12):
@@ -65,20 +73,20 @@ class TestPaydirektNotifications(TestCase):
         })
 
     # testing valid checkout
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_get_notify(self):
         client = Client()
         response = client.get('/paydirekt/notify/')
         self.assertEqual(response.status_code, 405)
 
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_notify_callback_unknown_checkout(self):
         client = Client()
         post_data = {'checkoutId': '123-abc-notfound1', 'merchantOrderReferenceNumber': '123-abc-notfound1', 'checkoutStatus': 'OPEN'}
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_known_checkout_unknown_at_paydirekt(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-notfound-paydirekt')
@@ -86,7 +94,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_correct_status(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-approved')
@@ -94,7 +102,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 200)
 
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_correct_status_minimal(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-approved-minimal')
@@ -102,7 +110,7 @@ class TestPaydirektNotifications(TestCase):
         response = client.post('/paydirekt/notify/', data=json.dumps(post_data), content_type='application/hal+json')
         self.assertEqual(response.status_code, 200)
 
-    @replace('django_paydirekt.wrappers.urllib2.urlopen', mock_urlopen)
+    @replace('django_paydirekt.wrappers.urlopen', mock_urlopen)
     def test_known_checkout_known_at_paydirekt_incorrect_status(self):
         client = Client()
         self._create_test_checkout(checkout_id='123-abc-expired')
@@ -641,14 +649,14 @@ class TestCustomer(object):
 
         # fraud protection requires GET before APPROVE checkout
         checkout_specific_url = self.checkout_detail_url.format(checkoutId=checkout_id)
-        request = urllib2.Request(checkout_specific_url)
+        request = Request(checkout_specific_url)
         request.add_header('Authorization', 'Bearer {}'.format(token))
         request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
         request.add_header('Accept', 'application/hal+json')
         request.add_header('User-Agent', 'Mozilla/5.0')
         try:
-            response = urllib2.urlopen(request, cafile=self.cafile)
-        except urllib2.HTTPError as e:
+            response = urlopen(request, cafile=self.cafile)
+        except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
@@ -657,15 +665,15 @@ class TestCustomer(object):
 
         # approve checkout
         approve_checkout_url = self.checkout_confirm_url.format(checkoutId=checkout_id)
-        request = urllib2.Request(approve_checkout_url)
+        request = Request(approve_checkout_url)
         request.add_header('Authorization', 'Bearer {}'.format(token))
         request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
         request.add_header('Accept', 'application/hal+json')
         request.add_header('User-Agent', 'Mozilla/5.0')
         request.add_data('')
         try:
-            response = urllib2.urlopen(request, cafile=self.cafile)
-        except urllib2.HTTPError as e:
+            response = urlopen(request, cafile=self.cafile)
+        except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
@@ -675,7 +683,7 @@ class TestCustomer(object):
             return json.load(response)
 
     def _get_token(self, checkout_id):
-        request = urllib2.Request(self.obtain_token_url)
+        request = Request(self.obtain_token_url)
         request.add_header('Authorization', 'Basic YnYtY2hlY2tvdXQtd2ViOjhjZEtIZVJ3eDNVNHI3WTlvQ0JkZ1A1OW5DdmNHTWRMa0NmQVNXdVZDdm8=')
         request.add_header('Content-Type', 'application/hal+json;charset=utf-8')
         request.add_header('Accept', 'application/hal+json')
@@ -689,8 +697,8 @@ class TestCustomer(object):
         }
         request.add_data(json.dumps(data))
         try:
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError as e:
+            response = urlopen(request)
+        except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
