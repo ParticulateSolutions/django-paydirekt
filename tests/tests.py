@@ -680,7 +680,7 @@ class TestCustomer(object):
             fp.close()
             raise AssertionError("Paydirekt Error {}({}): {}".format(e.code, e.msg, body))
         else:
-            return json.load(response)
+            return json.loads(response.read().decode('utf-8'))
 
     def _get_token(self, checkout_id):
         request = Request(self.obtain_token_url)
@@ -705,4 +705,4 @@ class TestCustomer(object):
             fp.close()
             raise AssertionError("Token Error {}({}): {}".format(e.code, e.msg, body))
         else:
-            return json.load(response)['access_token']
+            return json.loads(response.read().decode('utf-8'))['access_token']
