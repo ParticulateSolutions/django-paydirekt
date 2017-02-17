@@ -1,0 +1,2 @@
+include django_paydirekt/*
+include django_paydirekt/cacert.pem

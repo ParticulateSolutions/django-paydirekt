@@ -63,6 +63,7 @@ setup(
     url='https://github.com/ParticulateSolutions/django-paydirekt',
     packages=get_packages('django_paydirekt'),
     package_data=get_package_data('django_paydirekt'),
+    include_package_data=True,
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
