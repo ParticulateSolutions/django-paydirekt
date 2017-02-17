@@ -8,6 +8,7 @@ import logging
 import os
 import random
 import string
+import sys
 import time
 import uuid
 
@@ -207,7 +208,10 @@ class PaydirektWrapper(object):
             request.data = ''.encode(encoding='utf-8')
         request.add_header('Accept', 'application/json')
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
@@ -258,7 +262,10 @@ class PaydirektWrapper(object):
         request.data = data.encode(encoding='utf-8')
 
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp

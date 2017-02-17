@@ -8,6 +8,7 @@ import logging
 import os
 import time
 
+import sys
 from django.test import Client, TestCase
 from pip._vendor.requests import Response
 from testfixtures import replace
@@ -655,7 +656,10 @@ class TestCustomer(object):
         request.add_header('Accept', 'application/hal+json')
         request.add_header('User-Agent', 'Mozilla/5.0')
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
@@ -672,7 +676,10 @@ class TestCustomer(object):
         request.add_header('User-Agent', 'Mozilla/5.0')
         request.data = ''.encode(encoding='utf-8')
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
@@ -697,7 +704,10 @@ class TestCustomer(object):
         }
         request.data = json.dumps(data).encode(encoding='utf-8')
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
