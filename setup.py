@@ -40,7 +40,8 @@ def get_package_data(package):
     return {package: filepaths}
 
 REQUIREMENTS = [
-    'Django>=1.8'
+    'Django>=1.8',
+    'six>=1.10.0'
 ]
 
 version = get_version('django_paydirekt')
