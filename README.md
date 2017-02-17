@@ -1,4 +1,4 @@
-# django-paydirekt
+# django-paydirekt [![Build Status](https://travis-ci.org/ParticulateSolutions/django-paydirekt.svg?branch=master)](https://travis-ci.org/ParticulateSolutions/django-paydirekt)
 
 `django-paydirekt` is a lightweight [django](http://djangoproject.com) plugin which provides the integration of the payment service [paydirekt](https://www.paydirekt.de/).
 
