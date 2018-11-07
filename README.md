@@ -202,6 +202,18 @@ class MyNotifyPaydirektView(NotifyPaydirektView):
         return HttpResponse(status=400)
 ```
 
+### Sandbox/Production Switch
+
+You may want to use Paydirekt on Staging before you switch to Production, without deploying new code.
+You can achieve that by setting the sandbox keyword argument of the wrapper init method to False for sandbox.
+This way your settings may contain `PAYDIREKT_SANDBOX=False` and you can test your application before production usage.
+```python
+paydirekt_wrapper = PaydirektWrapper(auth={
+    'API_SECRET': 'sandbox-api-secret',
+    'API_KEY': 'sandbox-api-key'
+}, sandbox=True)
+```
+
 ## Copyright and license
 
-Copyright 2016-2017 Jonas Braun for Particulate Solutions GmbH, under [MIT license](https://github.com/minddust/bootstrap-progressbar/blob/master/LICENSE).
+Copyright 2016-2018 Jonas Braun for Particulate Solutions GmbH, under [MIT license](https://github.com/minddust/bootstrap-progressbar/blob/master/LICENSE).

@@ -40,12 +40,16 @@ class PaydirektWrapper(object):
 
     auth = None
 
-    def __init__(self, auth=None):
+    def __init__(self, auth=None, sandbox=None):
         super(PaydirektWrapper, self).__init__()
         if getattr(settings, 'PAYDIREKT', False):
             self.auth = auth
-            if django_paydirekt_settings.PAYDIREKT_SANDBOX:
-                self.api_url = self.sandbox_url
+            if sandbox is not None:
+                if sandbox:
+                    self.api_url = self.sandbox_url
+            else:
+                if django_paydirekt_settings.PAYDIREKT_SANDBOX:
+                    self.api_url = self.sandbox_url
 
     def init(self, total_amount, reference_number, payment_type, currency_code='EUR',
              success_url=django_paydirekt_settings.PAYDIREKT_SUCCESS_URL,
