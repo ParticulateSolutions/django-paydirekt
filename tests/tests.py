@@ -3,14 +3,16 @@
 
 from __future__ import unicode_literals
 
+import certifi
 import json
 import logging
 import os
 import time
 
 import sys
+
+import requests
 from django.test import Client, TestCase
-from pip._vendor.requests import Response
 from testfixtures import replace
 
 from django_paydirekt import settings as django_paydirekt_settings
@@ -51,7 +53,7 @@ def mock_urlopen(request, cafile=None):
     return result
 
 
-class MockResponse(Response):
+class MockResponse(requests.Response):
     response = ''
 
     def __init__(self, response):
@@ -640,7 +642,6 @@ class TestCustomer(object):
     obtain_token_url = 'https://api.sandbox.paydirekt.de/api/accountuser/v1/token/obtain'
     checkout_confirm_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}/confirm'
     checkout_detail_url = 'https://api.sandbox.paydirekt.de/api/checkout/v1/checkouts/{checkoutId}'
-    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_paydirekt')), 'cacert.pem')
 
     def confirm_checkout(self, paydirekt_checkout):
         checkout_id = paydirekt_checkout.checkout_id
@@ -657,7 +658,7 @@ class TestCustomer(object):
         request.add_header('User-Agent', 'Mozilla/5.0')
         try:
             if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=self.cafile)
+                response = urlopen(request, cafile=certifi.where())
             else:
                 response = urlopen(request)
         except HTTPError as e:
@@ -677,7 +678,7 @@ class TestCustomer(object):
         request.data = ''.encode(encoding='utf-8')
         try:
             if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=self.cafile)
+                response = urlopen(request, cafile=certifi.where())
             else:
                 response = urlopen(request)
         except HTTPError as e:
@@ -705,7 +706,7 @@ class TestCustomer(object):
         request.data = json.dumps(data).encode(encoding='utf-8')
         try:
             if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=self.cafile)
+                response = urlopen(request, cafile=certifi.where())
             else:
                 response = urlopen(request)
         except HTTPError as e:

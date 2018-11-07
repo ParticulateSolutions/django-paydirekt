@@ -41,7 +41,9 @@ def get_package_data(package):
 
 REQUIREMENTS = [
     'Django>=1.8',
-    'six>=1.10.0'
+    'six>=1.10.0',
+    'certifi>=2018.10.15',
+    'requests>=2.20.0',
 ]
 
 version = get_version('django_paydirekt')

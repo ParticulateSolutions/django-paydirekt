@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import base64
+import certifi
 import hashlib
 import hmac
 import json
@@ -30,7 +31,6 @@ except ImportError:
 
 class PaydirektWrapper(object):
     interface_version = 'django_paydirekt_v{}'.format(django_paydirekt_settings.DJANGO_PAYDIREKT_VERSION)
-    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_paydirekt')), 'cacert.pem')
 
     api_url = django_paydirekt_settings.PAYDIREKT_API_URL
     sandbox_url = django_paydirekt_settings.PAYDIREKT_SANDBOX_API_URL
@@ -213,7 +213,7 @@ class PaydirektWrapper(object):
         request.add_header('Accept', 'application/json')
         try:
             if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=self.cafile)
+                response = urlopen(request, cafile=certifi.where())
             else:
                 response = urlopen(request)
         except HTTPError as e:
@@ -267,7 +267,7 @@ class PaydirektWrapper(object):
 
         try:
             if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=self.cafile)
+                response = urlopen(request, cafile=certifi.where())
             else:
                 response = urlopen(request)
         except HTTPError as e:
