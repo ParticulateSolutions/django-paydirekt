@@ -6,12 +6,10 @@ from __future__ import unicode_literals
 import certifi
 import json
 import logging
-import os
 import time
 
 import sys
 
-import requests
 from django.test import Client, TestCase
 from testfixtures import replace
 
@@ -53,7 +51,7 @@ def mock_urlopen(request, cafile=None):
     return result
 
 
-class MockResponse(requests.Response):
+class MockResponse(object):
     response = ''
 
     def __init__(self, response):
