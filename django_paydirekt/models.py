@@ -127,7 +127,7 @@ class PaydirektCheckout(models.Model):
             logger.error("Paydirekt Checkout Link not available: {}".format(self.link))
             return False
 
-        if expected_status and expected_status != checkout_response['status']:
+        if expected_status and expected_status != 'OPEN' and expected_status != checkout_response['status']:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Checkout Status Error: expected: {0}, found: {1}".format(expected_status, checkout_response['status']))
             return False
@@ -175,7 +175,7 @@ class PaydirektCapture(models.Model):
             logger.error("Paydirekt Capture Link not available: {}".format(self.link))
             return False
 
-        if expected_status and expected_status != capture_response['status']:
+        if expected_status and expected_status != 'OPEN' and expected_status != capture_response['status']:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Capture Status Error: expected: {0}, found: {1}".format(expected_status, capture_response['status']))
             return False
@@ -214,7 +214,7 @@ class PaydirektRefund(models.Model):
             logger.error("Paydirekt Refund Link not available: {}".format(self.link))
             return False
 
-        if expected_status and expected_status != refund_response['status']:
+        if expected_status and expected_status != 'OPEN' and expected_status != refund_response['status']:
             logger = logging.getLogger(__name__)
             logger.error("Paydirekt Refund Status Error: expected: {0}, found: {1}".format(expected_status, refund_response['status']))
             return False
