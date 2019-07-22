@@ -148,7 +148,7 @@ class PaydirektCheckout(models.Model):
 
 @python_2_unicode_compatible
 class PaydirektCapture(models.Model):
-    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='captures')
+    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='captures', on_delete=models.CASCADE)
     amount = models.DecimalField(_("amount"), max_digits=9, decimal_places=2)
     transaction_id = models.CharField(_("transaction id"), max_length=255, unique=True)
     final = models.BooleanField(_("final"), default=False)
@@ -188,7 +188,7 @@ class PaydirektCapture(models.Model):
 
 @python_2_unicode_compatible
 class PaydirektRefund(models.Model):
-    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='refunds')
+    checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='refunds', on_delete=models.CASCADE)
     amount = models.DecimalField(_("amount"), max_digits=9, decimal_places=2)
     transaction_id = models.CharField(_("transaction id"), max_length=255, unique=True)
     link = models.URLField(_("link"))
