@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('refund_type', models.CharField(max_length=255, verbose_name='refund type', blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='created at')),
                 ('last_modified', models.DateTimeField(auto_now=True, verbose_name='last modified')),
-                ('checkout', models.ForeignKey(related_name='refunds', verbose_name='checkout', to='django_paydirekt.PaydirektCheckout')),
+                ('checkout', models.ForeignKey(related_name='refunds', verbose_name='checkout', to='django_paydirekt.PaydirektCheckout', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'Paydirekt Refund',
@@ -70,6 +70,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='paydirektcapture',
             name='checkout',
-            field=models.ForeignKey(related_name='captures', verbose_name='checkout', to='django_paydirekt.PaydirektCheckout'),
+            field=models.ForeignKey(related_name='captures', verbose_name='checkout', to='django_paydirekt.PaydirektCheckout', on_delete=models.CASCADE),
         ),
     ]
