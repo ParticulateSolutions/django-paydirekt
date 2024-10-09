@@ -1,12 +1,9 @@
-from __future__ import unicode_literals
-
 import base64
 import certifi
 import hashlib
 import hmac
 import json
 import logging
-import os
 import random
 import string
 import sys
@@ -19,14 +16,10 @@ from django_paydirekt import settings as django_paydirekt_settings
 from django_paydirekt.models import PaydirektCheckout
 from django_paydirekt.utils import build_paydirekt_full_uri
 
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    from urllib.request import urlopen
-    from urllib.request import Request
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import HTTPError, Request, urlopen
+from urllib.error import HTTPError
+from urllib.request import urlopen
+from urllib.request import Request
+
 
 
 class PaydirektWrapper(object):
