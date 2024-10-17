@@ -1,14 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import certifi
 import json
 import logging
 import time
-
-import sys
 
 from django.test import Client, TestCase
 from testfixtures import replace
@@ -19,14 +12,10 @@ from django_paydirekt.wrappers import PaydirektWrapper
 
 from .test_response_mockups import TEST_RESPONSES
 
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    from urllib.request import urlopen
-    from urllib.request import Request
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import HTTPError, Request, urlopen
+from urllib.error import HTTPError
+from urllib.request import urlopen
+from urllib.request import Request
+
 
 
 def mock_generate_uuid(length=12):
@@ -655,12 +644,9 @@ class TestCustomer(object):
         request.add_header('Accept', 'application/hal+json')
         request.add_header('User-Agent', 'Mozilla/5.0')
         try:
-            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=certifi.where())
-            else:
-                response = urlopen(request)
+            response = urlopen(request, cafile=certifi.where())
         except HTTPError as e:
-            logger = logging.getLogger(__name__)
+            logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
             fp.close()
@@ -675,10 +661,7 @@ class TestCustomer(object):
         request.add_header('User-Agent', 'Mozilla/5.0')
         request.data = ''.encode(encoding='utf-8')
         try:
-            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=certifi.where())
-            else:
-                response = urlopen(request)
+            response = urlopen(request, cafile=certifi.where())
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp
@@ -703,12 +686,9 @@ class TestCustomer(object):
         }
         request.data = json.dumps(data).encode(encoding='utf-8')
         try:
-            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
-                response = urlopen(request, cafile=certifi.where())
-            else:
-                response = urlopen(request)
+            response = urlopen(request, cafile=certifi.where())
         except HTTPError as e:
-            logger = logging.getLogger(__name__)
+            logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
             fp.close()

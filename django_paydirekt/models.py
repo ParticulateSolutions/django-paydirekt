@@ -1,14 +1,10 @@
-from __future__ import unicode_literals
-
 import logging
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_paydirekt.utils import build_paydirekt_full_uri
 
 
-@python_2_unicode_compatible
 class PaydirektCheckout(models.Model):
     checkout_id = models.CharField(_("checkout id"), max_length=255, unique=True)
     payment_type = models.CharField(_("payment type"), max_length=255)
@@ -146,7 +142,6 @@ class PaydirektCheckout(models.Model):
         return True
 
 
-@python_2_unicode_compatible
 class PaydirektCapture(models.Model):
     checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='captures', on_delete=models.CASCADE)
     amount = models.DecimalField(_("amount"), max_digits=9, decimal_places=2)
@@ -186,7 +181,6 @@ class PaydirektCapture(models.Model):
         return True
 
 
-@python_2_unicode_compatible
 class PaydirektRefund(models.Model):
     checkout = models.ForeignKey(PaydirektCheckout, verbose_name=_("checkout"), related_name='refunds', on_delete=models.CASCADE)
     amount = models.DecimalField(_("amount"), max_digits=9, decimal_places=2)
